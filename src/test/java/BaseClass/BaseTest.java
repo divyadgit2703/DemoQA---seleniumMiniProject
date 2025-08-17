@@ -21,11 +21,11 @@ public class BaseTest {
         driver.get("https://demoqa.com/");
         driver.manage().window().maximize();
     }
-//
-//    @AfterSuite(alwaysRun = true)
-//    public void tearDownSuite() {
-//        if (driver != null) {
-//            driver.quit();
-//        }
-//    }
+
+    @AfterSuite(alwaysRun = true)
+    public void tearDownSuite() {
+        if (driver != null) {
+            driver.quit();
+        }
+    }
 }

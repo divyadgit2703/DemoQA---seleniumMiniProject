@@ -1,11 +1,22 @@
 package testCases;
 
 import BaseClass.BaseTest;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.*;
+import org.openqa.selenium.interactions.Actions;
 import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import org.testng.Assert;
 import org.testng.annotations.Test;
+
+import javax.imageio.stream.FileImageInputStream;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.time.Duration;
 import java.util.List;
 
@@ -133,7 +144,7 @@ public class DemoQAElementsRelatedTests extends BaseTest {
     }
 
 
-    @Test(description = "Verify user able to select and deselect single check box")
+    @Test(description = "Verify user able to select and deselect multiple check box")
     public void selectDeselectMultipleCheckbox() {
         driver.findElement(By.xpath("//h5[text()='Book Store Application']/../..")).click();
         driver.findElement(By.xpath("//div[text()='Elements']/..")).click();
@@ -147,5 +158,69 @@ public class DemoQAElementsRelatedTests extends BaseTest {
             }
         }
     }
-}
+
+    @Test(description = "Verify user able to select and deselect single radio button")
+    public void selectAndDeselectRadioButton() {
+        driver.findElement(By.xpath("//h5[text()='Book Store Application']/../..")).click();
+        driver.findElement(By.xpath("//div[text()='Elements']/..")).click();
+        driver.findElement(By.xpath("//span[text()='Radio Button']")).click();
+        WebDriverWait wait=new WebDriverWait(driver,Duration.ofSeconds(5));
+        By yesRadioBtn = By.xpath("//label[text()='Yes']");
+        WebElement yesRadioBtnLocator = wait.until(ExpectedConditions.visibilityOfElementLocated(yesRadioBtn));
+        yesRadioBtnLocator.isDisplayed();
+        driver.findElement(By.id("impressiveRadio")).isEnabled();
+        driver.findElement(By.id("yesRadio")).isEnabled();
+        driver.findElement(By.id("noRadio")).isEnabled();
+        boolean yesRadioBtnLocatorEnabled = yesRadioBtnLocator.isEnabled();
+        if(yesRadioBtnLocatorEnabled) {
+        yesRadioBtnLocator.click();
+        }
+        boolean impressiveRadioBtn = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='Impressive']"))).isDisplayed();
+        boolean noRadioBtn = wait.until(ExpectedConditions.visibilityOfElementLocated(By.xpath("//label[text()='No']"))).isDisplayed();
+
+    }
+
+
+    @Test(description = "Add all radio button options into a excel file")
+    public void writeRadioOptionInExcel() throws IOException {
+        WebDriverWait wait=new WebDriverWait(driver,Duration.ofSeconds(5));
+        driver.findElement(By.xpath("//h5[text()='Book Store Application']/../..")).click();
+        driver.findElement(By.xpath("//div[text()='Elements']/..")).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Radio Button']"))).click();
+        List<WebElement> radioList = driver.findElements(By.xpath("//input[@type='radio']/following-sibling::label"));
+        for (WebElement list:radioList)
+        {
+            System.out.println(list.getText());
+        }
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("example1");
+        Row row = sheet.createRow(0);
+        for (int i=0;i<radioList.size();i++)
+        {
+         Cell cell = row.createCell(i);
+         cell.setCellValue(radioList.get(i).getText());
+        }
+        try (FileOutputStream fos = new FileOutputStream("sample.xlsx")) {
+            workbook.write(fos);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        workbook.close();
+    }
+
+    @Test(description = "Add/Edit/Delete record in webtable")
+    public void addEditDeleteRecord(){
+        WebDriverWait wait=new WebDriverWait(driver,Duration.ofSeconds(5));
+        driver.findElement(By.xpath("//h5[text()='Book Store Application']/../..")).click();
+        driver.findElement(By.xpath("//div[text()='Elements']/..")).click();
+        wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Web Tables']"))).click();
+        String title = driver.findElement(By.xpath("//h1[text()='Web Tables']")).getText();
+        Assert.assertEquals(title, "Web Tables", "Incorrect page title");
+        driver.findElement(By.id("addNewRecordButton")).click();
+        driver.findElement(By.id("registration-form-modal")).isDisplayed();
+
+    }
+    }
+
+
 
