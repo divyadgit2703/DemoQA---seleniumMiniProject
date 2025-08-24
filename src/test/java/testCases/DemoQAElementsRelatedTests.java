@@ -5,6 +5,9 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.openqa.selenium.*;
 import org.openqa.selenium.interactions.Actions;
@@ -209,15 +212,49 @@ public class DemoQAElementsRelatedTests extends BaseTest {
     }
 
     @Test(description = "Add/Edit/Delete record in webtable")
-    public void addEditDeleteRecord(){
+    public void addAllTableDataIntoExcel() throws IOException{
         WebDriverWait wait=new WebDriverWait(driver,Duration.ofSeconds(5));
         driver.findElement(By.xpath("//h5[text()='Book Store Application']/../..")).click();
         driver.findElement(By.xpath("//div[text()='Elements']/..")).click();
         wait.until(ExpectedConditions.elementToBeClickable(By.xpath("//span[text()='Web Tables']"))).click();
         String title = driver.findElement(By.xpath("//h1[text()='Web Tables']")).getText();
         Assert.assertEquals(title, "Web Tables", "Incorrect page title");
-        driver.findElement(By.id("addNewRecordButton")).click();
-        driver.findElement(By.id("registration-form-modal")).isDisplayed();
+        List<WebElement> allRows =driver.findElements(By.xpath("//div[@role='rowgroup']"));
+        int rows = allRows.size();
+        int cols = allRows.get(0).findElements(By.xpath(".//div[@role='gridcell']")).size();
+        System.out.println(rows);
+        System.out.println(cols);
+        Object[][] arr = new Object[rows][cols];
+        for(int i=0;i<rows;i++)
+        {
+            List<WebElement> cells = allRows.get(i).findElements(By.xpath(".//div[@role='gridcell']"));
+            for (int j=0;j< cells.size();j++)
+            {
+                arr[i][j]=cells.get(j).getText().trim();
+            }
+        }
+        XSSFWorkbook workbook = new XSSFWorkbook();
+        XSSFSheet sheet = workbook.createSheet("webtable");
+        for(int r=0;r<rows;r++)
+        {
+            XSSFRow row = sheet.createRow(r);
+            for(int c=0;c<cols;c++)
+            {
+                XSSFCell cell=row.createCell(c);
+                Object value = arr[r][c];
+                if(value instanceof String)
+                  cell.setCellValue((String)value);
+                else
+                {
+                    if(value instanceof Integer)
+                        cell.setCellValue((String)value);
+                }
+            }
+        }
+        String filepath = ".\\webtable.xlsx";
+        FileOutputStream out=new FileOutputStream(filepath);
+        workbook.write(out);
+
 
     }
     }
